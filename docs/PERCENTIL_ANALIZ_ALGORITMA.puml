@@ -1,0 +1,125 @@
+@startuml Percentile-Analysis-Flowchart
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam startEndBackgroundColor #10b981
+skinparam endBackgroundColor #10b981
+skinparam activityBackgroundColor #dbeafe
+skinparam activityBorderColor #0284c7
+skinparam activityBorderThickness 2
+skinparam decisionBackgroundColor #fef3c7
+skinparam decisionBorderColor #eab308
+skinparam decisionBorderThickness 2
+skinparam arrowColor #4b5563
+skinparam arrowThickness 2
+skinparam noteFontSize 10
+
+title **Persentil Analiz Algoritması**\n**Detaylı Akış Diyagramı**
+
+start
+
+:📊 **GİRİŞ**
+  ----
+  • Ölçülen Değer (value)
+  • Referans Veri Dizisi (dataArray)
+  • Persentil Anahtarları (keys);
+
+:Yaşa Uygun Veriyi Seç
+  ----
+  getSafeData(age, dataset)
+  En yakın yaş bulunur;
+
+:Değeri Referanslara Karşılaştır
+  ----
+  min = dataArray[0]
+  max = dataArray[last];
+
+if (value < Min\nPerentil?) then (🔴 CRİTİK)
+  :< 3. Persentil
+    ----
+    Çok Düşük
+    status = critical;
+else
+  if (value > Max\nPerentil?) then (🔴 CRİTİK)
+    :> 95. Persentil
+      ----
+      Çok Yüksek
+      status = critical;
+  else (✓ Aralıkta)
+    :İki Persentil Arası
+      ----
+      Interpolasyon yap
+      percentileValue = ortanca;
+    
+    if (Persentil ≤ 3 VEYA\n≥ 95?) then (🔴 CRİTİK)
+      :status = critical;
+    else
+      if (5-15 VEYA\n85-95?) then (🟠 UYARI)
+        :status = warning;
+      else (🟢 İDEAL)
+        :15-85 Aralığı
+          ----
+          Normal Gelişim
+          status = ideal;
+      endif;
+    endif;
+  endif;
+endif;
+
+:📤 **ÇIKTI**
+  ----
+  PercentileResult {
+    • text: string
+    • status: critical|warning|ideal
+    • percentileValue: number
+  };
+
+stop
+
+note right
+  **Standart Kütükler:**
+  
+  **WHO Persentilleri:**
+  3, 5, 15, 50, 85, 95, 97
+  → BMI, Boy, Kilo (ilk aşamalar)
+  
+  **NCHS Persentilleri:**
+  5, 10, 15, 25, 50, 75, 85, 90, 95
+  → Triceps, Kol Çevresi, Yağ, Kas
+end note
+
+note bottom
+  🎯 **DURUM ANLAMLANDIRMASI:**
+  
+  **🔴 CRİTİK (≤3 veya ≥95):**
+  Tıbbi danışma önerilir
+  Mobil ağırlık kullanılır beslenme hesaplamasında
+  
+  **🟠 UYARI (5-15 veya 85-95):**
+  Beslenme/Aktivite düzeltmesi
+  Düzenli izleme
+  
+  **🟢 İDEAL (15-85):**
+  Normal gelişim
+  Rutin kontrolü yeterli
+end note
+
+@enduml
+
+
+note bottom
+  🎯 **DURUM ANLAMLANDIRMASI:**
+  
+  **🔴 CRİTİK (≤3 veya ≥95):**
+  Tıbbi danışma önerilir
+  Mobil ağırlık kullanılır beslenme hesaplamasında
+  
+  **🟠 UYARI (5-15 veya 85-95):**
+  Beslenme/Aktivite düzeltmesi
+  Düzenli izleme
+  
+  **🟢 İDEAL (15-85):**
+  Normal gelişim
+  Rutin kontrolü yeterli
+end note
+
+@enduml

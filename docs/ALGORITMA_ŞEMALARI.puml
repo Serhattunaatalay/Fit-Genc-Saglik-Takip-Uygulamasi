@@ -1,0 +1,344 @@
+@startuml Fit-Genc-Saglik-ve-Beslenme-Takip
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam componentBackgroundColor #f8f9fa
+skinparam componentBorderColor #3b82f6
+skinparam componentBorderThickness 2
+skinparam packageBackgroundColor #eff6ff
+skinparam packageBorderColor #1e40af
+skinparam packageBorderThickness 2.5
+skinparam arrowColor #4b5563
+skinparam arrowThickness 2
+skinparam noteFontSize 10
+skinparam noteBkgColor #f0fdf4
+skinparam noteBorderColor #10b981
+
+title **Fit Genç - Sağlık ve Beslenme Takip Uygulaması**\n**Ana Algoritma Mimarisi**
+
+' ========== AŞAMA 1: PROFİL YÖNETİMİ ==========
+package "1️⃣ PROFİL YÖNETİMİ" #e0e7ff {
+    component "👤 Profil Listesi" as P1
+    component "➕ Yeni Profil" as P2
+    component "🗑️ Profil Silme" as P3
+}
+
+' ========== AŞAMA 2: ÖLÇÜM GİRİŞİ ==========
+package "2️⃣ ÖLÇÜM GİRİŞİ" #dbeafe {
+    component "📝 Ölçüm Formu" as M1
+    component "✓ Veri Doğrulama" as M2
+}
+
+' ========== AŞAMA 3: ANTROPOMETRIK HESAPLALAMALAR ==========
+package "3️⃣ ANTROPOMETRIK HESAPLAMALAR" #dcfce7 {
+    component "📅 Yaş Hesaplama" as A1
+    component "⚖️ BMI" as A2
+    component "📏 WHTR" as A3
+    component "💪 Kol Yağ Alanı" as A4
+    component "🦵 Kol Kas Alanı" as A5
+}
+
+note right of A2
+  **BMI Formülü:**
+  BMI = ağırlık (kg) / boy² (m²)
+  
+  Persentil Aralıkları (WHO):
+  • 3. Persentil
+  • 5. Persentil
+  • 15. Persentil
+  • 50. Persentil (Medyan)
+  • 85. Persentil
+  • 95. Persentil
+  • 97. Persentil
+end note
+
+note right of A3
+  **WHTR Formülü:**
+  WHTR = bel çevresi / boy
+  
+  İdeal: WHTR < 0.5
+  
+  Persentil Aralıkları (NCHS):
+  • 5, 10, 15, 25, 50, 75, 85, 90, 95
+end note
+
+note right of A4
+  **Kol Yağ Alanı (AFA):**
+  C = (triceps mm × kol çevresi) / 2
+  AFA = π × (triceps²) / 4 - C
+  
+  **Kol Kas Alanı (AMA):**
+  AMA = ((kol çevresi - π × triceps)² / 4π) - C
+  
+  C sabitleri (NCHS):
+  • Erkek: C = 10
+  • Kız: C = 6.5
+  
+  Tüm ölçümler mm cinsinden
+end note
+
+' ========== AŞAMA 4: PERSENTİL ANALİZİ ==========
+package "4️⃣ PERSENTİL ANALİZİ (WHO/NCHS)" #fef3c7 {
+    component "📊 Yaşa Uygun Veri Seçimi" as PE1
+    component "🔍 7 Ölçümü Standartlara Karşılaştır" as PE2
+    component "🎯 Durum Belirleme" as PE3
+}
+
+note right of PE2
+  **Persentil Interpolasyon:**
+  if değer < min → %1 Persentil (Critical)
+  if değer > max → %99 Persentil (Critical)
+  else → (p_start + p_end) / 2
+  
+  **Durum Sınıflandırması:**
+  • Critical: ≤3 veya ≥95 persentil
+  • Warning: 5-15 veya 85-95 persentil
+  • Ideal: 15-85 persentil
+  
+  **Referans Standartları:**
+  • WHO (7 persentil): 3, 5, 15, 50, 85, 95, 97
+  • NCHS (9 persentil): 5, 10, 15, 25, 50, 75, 85, 90, 95
+  
+  7 Ölçüm:
+  Boy, Ağırlık, BMI, Bel, Triceps, Kol Çevresi, Kol Kas Alanı
+end note
+
+' ========== AŞAMA 5: BESLENME HESAPLAMA ==========
+package "5️⃣ BESLENME İHTİYAÇ HESAPLAMA" #fce7f3 {
+    component "🔧 Düzeltilmiş Ağırlık" as N1
+    component "⚡ Mobil Ağırlık" as N2
+    component "🔋 Harris-Benedict TEE" as N3
+    component "🥗 Makro Besinler" as N4
+}
+
+note right of N1
+  **Adım 1: Düzeltilmiş Ağırlık**
+  düzeltilmiş_ağırlık = katsayı × boy(m)
+  
+  Katsayılar (Yaş-Cinsiyet):
+  • 13.0E: 18.2, 13.0K: 18.8
+  • 14.0E: 19.0, 14.0K: 19.6
+  • 15.0E: 19.8, 15.0K: 20.2
+  • 17.6E: 21.4, 17.6K: 21.2
+  (10 yaş noktası için interpolasyon)
+end note
+
+note right of N2
+  **Adım 2: Mobil Ağırlık**
+  
+  if BMI = Critical:
+    mobil_ağırlık = (0.75 × gerçek) 
+                  + (0.25 × düzeltilmiş)
+    kullanılacak = mobil_ağırlık
+  else:
+    kullanılacak = gerçek_ağırlık
+end note
+
+note right of N3
+  **Adım 3: Harris-Benedict Formülü**
+  
+  ERKEK (E):
+  TEE = (17.5 × ağırlık + 651) × PAL
+  
+  KIZ (K):
+  TEE = (12.2 × ağırlık + 746) × PAL
+  
+  PAL (Fiziksel Aktivite Seviyesi): 1.6
+  (Orta aktivite düzeyi)
+end note
+
+note right of N4
+  **Adım 4: Makro Besinler (TEE'den)**
+  
+  Protein = (TEE × 0.18) / 4 kcal/g
+  Karbohidrat = (TEE × 0.52) / 4 kcal/g
+  Yağ = (TEE × 0.30) / 9 kcal/g
+  
+  Dağılım Yüzdeleri:
+  • Protein: %18
+  • Karbohidrat: %52
+  • Yağ: %30
+  
+  Adım 5: Su & Lif (Yaş-Cinsiyet):
+  Erkek:
+  • 13-13.6: 19g lif, 2.1L su
+  • 14-14.6: 19g lif, 2.5L su
+  • 15-17.6: 21g lif, 2.5L su
+  
+  Kız:
+  • 13-13.6: 19g lif, 1.9L su
+  • 14-14.6: 19g lif, 2.0L su
+  • 15-17.6: 21g lif, 2.0L su
+end note
+
+' ========== AŞAMA 6: MİKRO BESİNLER ==========
+package "6️⃣ MİKRO BESİNLERLER" #f3e8ff {
+    component "🎂 Yaş Grubu Seçimi" as MN1
+    component "💊 Vitaminler" as MN2
+    component "⛏️ Mineraller" as MN3
+}
+
+note right of MN1
+  **Mikro Besin Yaş Gruplandırması:**
+  
+  Grup 1: 13-14.6 yaş
+  (Yaşlar: 13, 13.6, 14, 14.6)
+  
+  Grup 2: 15-17.6 yaş
+  (Yaşlar: 15, 15.6, 16, 16.6, 17, 17.6)
+  
+  İçeriği: Tüber 2022'ye göre
+  Erkek & Kız (ayrı tablolar)
+  
+  Not: Riboflavin uyarlaması:
+  • 13-13.6: 1.4 mg → 13.6'dan 1.6 mg
+  • 15+: 1.6 mg
+end note
+
+note right of MN2
+  **Vitaminler (13 adet):**
+  A, D, E, K, B1, B2, B3, B6, B12,
+  Folat, C, Biotin, Pantotenik Asit
+  
+  Grup 1 (13-14.6):
+  A: 600 mcg, D: 15 mcg, C: 70 mg
+  
+  Grup 2 (15-17.6):
+  A: 750 mcg, D: 15 mcg, C: 100 mg
+end note
+
+note right of MN3
+  **Mineraller (11 adet):**
+  Kalsiyum, Fosfor, Magnezyum, Demir,
+  Çinko, İyot, Bakır, Potasyum,
+  Selenyum, Flor, Manganez
+  
+  Grup 1 (13-14.6):
+  Kalsiyum: 1150 mg
+  Demir: 13 mg (her yaş)
+  Çinko: 10.7 mg (E) / Aynı (K)
+  
+  Grup 2 (15-17.6):
+  Potasyum: 3500 mg (artış)
+  Çinko: 11.9 mg (E) / Aynı (K)
+end note
+
+' ========== AŞAMA 7: SONUÇ & RAPORLAMA ==========
+package "7️⃣ SONUÇ & RAPORLAMA" #f0fdf4 {
+    component "📋 Ölçüm Özeti" as R1
+    component "📊 Persentil Grafiği" as R2
+    component "📈 Trend Analizi" as R3
+}
+
+' ========== VERİ DEPOSU ==========
+database "💾 DEPOLAMA" #f0f9ff {
+}
+
+' ========== ANA AKIŞ BAĞLANTILARI ==========
+P1 -.-> P2 : "Yeni Ekle"
+P1 -.-> M1 : "Ölçüm Giriş"
+P1 -.-> P3 : "Sil"
+
+M1 --> M2 : "Gönder"
+M2 --> A1 : "Boy, Kilo, Bel, Triceps, Kol"
+
+A1 --> A2 : "Yaş"
+A1 --> A3
+A1 --> A4
+A1 --> A5
+A2 --> A3 : "BMI"
+A4 --> A5
+
+A5 --> PE1 : "6 Ölçüm"
+PE1 --> PE2 : "Referans Veri"
+PE2 --> PE3 : "Persentil Değerleri"
+
+PE3 --> N1 : "BMI Durumu"
+A1 --> N1 : "Yaş-Cinsiyet\nKatsayısı"
+N1 --> N2 : "Düzeltilmiş Ağırlık"
+N2 --> N3 : "Kullanılacak Ağırlık"
+N3 --> N4 : "TEE Enerji"
+
+A1 --> MN1 : "Yaş Grubu"
+MN1 --> MN2 : "13-14.6 veya 15-17.6"
+MN1 --> MN3
+
+PE3 --> R1 : "7 Ölçüm\nPersentili"
+N4 --> R1 : "Makro Besinler"
+MN2 --> R1
+MN3 --> R1
+
+R1 --> R2 : "Veriler"
+R2 --> R3 : "Trend"
+
+R1 --> DEPOLAMA : "Kaydet"
+P2 --> DEPOLAMA : "Kaydet"
+R3 --> DEPOLAMA : "Kaydet"
+DEPOLAMA -.-> P1 : "Yükle"
+
+
+note bottom of P1
+  **Merkez Noktası:**
+  Tüm işlemler buradan başlar
+end note
+
+note right of A1
+  **Yaş Hesaplama Formülü:**
+  rawAge = (now - birthDate) / (365.25 × 24 × 60 × 60 × 1000)
+  
+  Ondalık Dönemlendirilme:
+  • decimal < 0.3 → floor(age)
+  • 0.3 ≤ decimal < 0.8 → floor(age) + 0.6
+  • decimal ≥ 0.8 → floor(age) + 1
+  
+  Çıkış: 13, 13.6, 14, ..., 17.6
+end note
+
+note right of N3
+  **Harris-Benedict Formülü**
+  TEE = (a × ağırlık + b) × PAL
+  
+  Erkek:  (17.5 × kg + 651) × 1.6
+  Kız:    (12.2 × kg + 746) × 1.6
+  
+  PAL = 1.6 (orta aktivite)
+end note
+
+note right of DEPOLAMA
+  **Browser LocalStorage:**
+  
+  Depolanan Veri Yapısı:
+  {
+    profileId: string,
+    studentName: string,
+    gender: 'male' | 'female',
+    birthDate: ISO date string,
+    measurements: [
+      {
+        date: ISO datetime,
+        height: number (cm),
+        weight: number (kg),
+        waist: number (cm),
+        triceps: number (mm),
+        armCirc: number (cm),
+        results: {
+          age: number (13, 13.6, 14...),
+          bmi: number,
+          whtr: number,
+          afa: number,
+          ama: number,
+          percentiles: { ... },
+          nutrition: { ... }
+        }
+      }
+    ]
+  }
+  
+  Referans Veritabanları:
+  • WHO Persentilleri (7 nokta)
+  • NCHS Persentilleri (9 nokta)
+  • Harris-Benedict Sabitleri
+  • Katsayı Tabloları (10 yaş noktası)
+  • Mikro Besin Değerleri (Tüber 2022)
+end note
+
+@enduml

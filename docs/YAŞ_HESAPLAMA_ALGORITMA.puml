@@ -1,0 +1,128 @@
+@startuml Age-Calculation-Flowchart
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam startEndBackgroundColor #06b6d4
+skinparam endBackgroundColor #06b6d4
+skinparam activityBackgroundColor #cffafe
+skinparam activityBorderColor #0369a1
+skinparam activityBorderThickness 2
+skinparam arrowColor #4b5563
+skinparam arrowThickness 2
+skinparam noteFontSize 10
+
+title **Yaş Hesaplama Algoritması**\n**Dönemlendirilmiş Yaş (0.6 Ondalık)**
+
+start
+
+:📅 **GİRİŞ**
+  ----
+  Doğum Tarihi (ISO Format)
+  Örn: "2010-06-15";
+
+:Tarihleri Date Objesine Çevir
+  ----
+  dob = new Date(dobString)
+  now = new Date();
+
+:Zaman Farkını Milisaniye Cinsinden Hesapla
+  ----
+  **diffMs = now.getTime() - dob.getTime()**
+  
+  Örn: 2024-12-18 - 2010-06-15
+       = 537,206,400,000 ms;
+
+:Milisaniyeyi Yıla Dönüştür
+  ----
+  **rawAge = diffMs / (1000 × 60 × 60 × 24 × 365.25)**
+  
+  365.25: Artık yılları hesaba katar
+  Örn: 537,206,400,000 / 31,557,600,000
+       = 14.504 yıl;
+
+:Tam Kısım & Ondalık Ayrı
+  ----
+  floorAge = Math.floor(rawAge)
+  decimal = rawAge - floorAge
+  
+  Örn: floorAge = 14
+       decimal = 0.504 (%50.4);
+
+if (decimal < 0.3\nveya %30?) then (< %30 - Dönem Başı)
+  :Dönemlendirilmiş Yaş = floorAge
+    ----
+    Örn: 14 yaş
+    
+    (Doğum gününden %30'una kadar)
+    Aralık: 14.0 - 14.3;
+else
+  if (decimal < 0.8\nveya 0.3-%80?) then (%30-%80 - Dönem Ortası)
+    :Dönemlendirilmiş Yaş = floorAge + 0.6
+      ----
+      Örn: 14.6 yaş
+      
+      (Doğum gününden %30-%80'ine)
+      Aralık: 14.3 - 14.8;
+  else (> %80 - Dönem Sonu)
+    :Dönemlendirilmiş Yaş = floorAge + 1
+      ----
+      Örn: 15 yaş
+      
+      (Doğum gününden %80'inin sonrası)
+      Aralık: 14.8 - 15.0;
+  endif;
+endif;
+
+:📤 **ÇIKTI**
+  ----
+  Dönemlendirilmiş Yaş
+  Format: 13, 13.6, 14, 14.6, ..., 17.6
+  (veya: 13, 14, 15, 16, 17 - veri setine göre);
+
+stop
+
+note right
+  **Neden Dönemlendirilme?**
+  
+  📊 Persentil veriler 6 aylık
+  aralıklara sınıflandırılmıştır
+  
+  13.0, 13.6, 14.0, 14.6, 15.0, ...
+  
+  🧬 Adolesanlar hızlı gelişir
+  6 ay içinde belirgin değişim yaşanır
+  
+  ✓ Tam yaş yerine dönem göstergesi
+  daha klinik açıdan uygun
+end note
+
+note bottom
+  📈 **ÖRNEK HESAPLAMALAR:**
+  
+  **Senaryo 1:** 2010-06-15 → 2024-12-18
+  rawAge = 14.504 → **14.6 yaş** (dönem ortası)
+  
+  **Senaryo 2:** 2010-01-20 → 2024-12-18
+  rawAge = 14.960 → **15 yaş** (dönem başı)
+  
+  **Senaryo 3:** 2010-08-10 → 2024-12-18
+  rawAge = 14.359 → **14 yaş** (dönem başı)
+end note
+
+@enduml
+
+
+
+note bottom
+  📈 **ÖRNEK HESAPLAMALAR:**
+  
+  **Senaryo 1:** 2010-06-15 → 2024-12-18
+  rawAge = 14.504 → **14.6 yaş** (dönem ortası)
+  
+  **Senaryo 2:** 2010-01-20 → 2024-12-18
+  rawAge = 14.960 → **15 yaş** (dönem başı)
+  
+  **Senaryo 3:** 2010-08-10 → 2024-12-18
+  rawAge = 14.359 → **14 yaş** (dönem başı)
+end note
+
+@enduml

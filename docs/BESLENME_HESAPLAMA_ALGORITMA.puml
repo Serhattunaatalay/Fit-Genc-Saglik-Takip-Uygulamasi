@@ -1,0 +1,191 @@
+@startuml Nutrition-Calculation-Flowchart
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam startEndBackgroundColor #8b5cf6
+skinparam endBackgroundColor #8b5cf6
+skinparam activityBackgroundColor #fce7f3
+skinparam activityBorderColor #ec4899
+skinparam activityBorderThickness 2
+skinparam partitionBackgroundColor #fdf2f8
+skinparam partitionBorderColor #be185d
+skinparam partitionBorderThickness 2
+skinparam arrowColor #4b5563
+skinparam arrowThickness 2
+skinparam noteFontSize 10
+
+title **Beslenme İhtiyacı Hesaplama Algoritması**\n**5 Adım Ayrıntılı**
+
+start
+
+:📊 **GİRİŞ PARAMETRELERI**
+  ----
+  • Cinsiyet (M/K)
+  • Yaş (13-18)
+  • Mevcut Ağırlık (kg)
+  • Boy (m)
+  • BMI Durumu;
+
+partition "**ADIM 1: Düzeltilmiş Ağırlık**" {
+  :En Yakın Yaş Grubunu Bul
+    ----
+    ageKeys = [13.0, 13.6, 14.0, ..., 17.6]
+    min_distance() ile seç;
+  
+  :Katsayıyı Al
+    ----
+    coeff = CORRECTED_WEIGHT_COEFFICIENTS
+    [yaş][cinsiyet]
+    Örn: Erkek 14.6 → 19.4;
+  
+  :Düzeltilmiş Ağırlık Hesapla
+    ----
+    **correctedWeight = 
+    katsayı × boy(metre)**
+    Örn: 19.4 × 1.65 = 32.01 kg;
+}
+
+partition "**ADIM 2: Mobil Ağırlık (BMI Kritik İse)**" {
+  if (BMI Durumu\n== critical?) then (🔴 CRİTİK)
+    :Mobil Ağırlık Hesapla
+      ----
+      **usedWeight = 
+      (0.75 × mevcut) +
+      (0.25 × düzeltilmiş)**
+      
+      %75: Gerçek vücut
+      %25: Referans değer
+      Örn: (0.75×65) + (0.25×32) = 57.75;
+  else (✓ NORMAL)
+    :Gerçek Ağırlık Kullan
+      ----
+      usedWeight = currentWeight;
+  endif;
+}
+
+partition "**ADIM 3: Toplam Enerji Harcaması (TEE)**" {
+  :PAL Sabitini Ayarla
+    ----
+    **PAL = 1.6**
+    (Orta düzey fiziksel aktivite);
+  
+  if (Cinsiyet\n== Erkek?) then (♂️ ERKEK)
+    :Harris-Benedict Formülü
+      ----
+      **TEE = (17.5 × ağırlık + 651) × 1.6**
+      
+      Örn: (17.5×60 + 651) × 1.6
+           = 1701 × 1.6
+           = 2721.6 kcal/gün;
+  else (♀️ KIZ)
+    :Harris-Benedict Formülü
+      ----
+      **TEE = (12.2 × ağırlık + 746) × 1.6**
+      
+      Örn: (12.2×50 + 746) × 1.6
+           = 1356 × 1.6
+           = 2169.6 kcal/gün;
+  endif;
+}
+
+partition "**ADIM 4: Makro Besinler Dağılımı**" {
+  :Protein İhtiyacı
+    ----
+    **protein = (TEE × 0.18) / 4 gram**
+    %18 Enerji → Protein
+    Örn: (2721.6 × 0.18) / 4 = 122.5 g;
+  
+  :Karbonhidrat İhtiyacı
+    ----
+    **carb = (TEE × 0.52) / 4 gram**
+    %52 Enerji → Karbonhidrat
+    Örn: (2721.6 × 0.52) / 4 = 353.8 g;
+  
+  :Yağ İhtiyacı
+    ----
+    **fat = (TEE × 0.30) / 9 gram**
+    %30 Enerji → Yağ
+    Örn: (2721.6 × 0.30) / 9 = 90.7 g;
+}
+
+partition "**ADIM 5: Mikro Besinler (Yaşa Bağlı)**" {
+  if (13.0 ≤ yaş < 14.0?) then (13.0-13.9 YAŞ)
+    :water = M:2.1L / K:1.9L
+    fiber = 19 g;
+  else
+    if (14.0 ≤ yaş < 15.0?) then (14.0-14.9 YAŞ)
+      :water = M:2.5L / K:2.0L
+      fiber = 19 g;
+    else (15.0+ YAŞ)
+      :water = M:2.5L / K:2.0L
+      fiber = 21 g;
+    endif;
+  endif;
+}
+
+:📤 **ÇIKTI: NutritionNeeds**
+  ----
+  {
+    energy: kcal,
+    carb: gram,
+    fat: gram,
+    protein: gram,
+    water: litre,
+    fiber: gram
+  };
+
+stop
+
+note right
+  **Kaynak Referanslar:**
+  
+  📖 **PDF - Tüber, 2022**
+  Türkiye Beslenme Rehberi
+  • Katsayı Tabloları
+  • Su & Lif İhtiyaçları
+  
+  📊 **Harris-Benedict**
+  Bazal Metabolik Hız Formülü
+  • 1919 yılından beri standart
+  • Adolesanlar için PAL=1.6
+  
+  🧪 **Enerji Dağılımı**
+  • Büyüme döneminde %18 protein
+  • Önerilen dağılım standart
+end note
+
+note bottom
+  💡 **ÖZEL DURUMLAR:**
+  
+  • **BMI Kritik:**
+  Mobil ağırlık kullanılır
+  (gerçekçi beslenme planı)
+  
+  • **Cinsiyete Göre Fark:**
+  Kızlar erkeklere göre
+  daha az enerji ve su ihtiyacı
+  
+  • **Yaş Geçişi:**
+  14 ve 15 yaşında
+  lif ve su ihtiyaçında artış
+end note
+
+@enduml
+
+
+note bottom
+  💡 **ÖZEL DURUMLAR:**
+  
+  • **BMI Kritik:**
+  Mobil ağırlık kullanılır
+  (gerçekçi beslenme planı)
+  
+  • **Cinsiyete Göre Fark:**
+  Kızlar erkeklere göre
+  daha az enerji ve su ihtiyacı
+  
+  • **Yaş Geçişi:**
+  14 ve 15 yaşında
+  lif ve su ihtiyacında artış
+end note
+
+@enduml

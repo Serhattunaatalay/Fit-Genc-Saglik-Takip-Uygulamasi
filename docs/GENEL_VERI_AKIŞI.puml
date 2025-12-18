@@ -1,0 +1,129 @@
+@startuml Overall-Data-Flow
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam componentBackgroundColor #f8f9fa
+skinparam componentBorderColor #6366f1
+skinparam componentBorderThickness 2.5
+skinparam packageBackgroundColor #e0e7ff
+skinparam packageBorderColor #4f46e5
+skinparam packageBorderThickness 2.5
+skinparam arrowColor #4b5563
+skinparam arrowThickness 2
+skinparam noteFontSize 10
+
+title **Fit Genç - Genel Veri Akışı**\n**Sistem Bileşen Mimarisi**
+
+package "🎯 KULLANICI ARAYÜZÜ (React)" {
+  component "📋 Ana Sayfa" as UI1
+  component "👤 Profil Yönetimi" as UI2
+  component "📝 Ölçüm Formu" as UI3
+  component "📊 Sonuç Görünümü" as UI4
+  component "📈 Tarih & Trend" as UI5
+}
+
+package "🧮 İŞLEM MOTORU (Algoritma)" {
+  component "📅 Yaş Hesaplama" as ALG1
+  component "⚖️ Antropometrik" as ALG2
+  component "📊 Persentil Analiz" as ALG3
+  component "🥗 Beslenme Hesapla" as ALG4
+}
+
+package "📁 VERİ KAYNAKLARI" {
+  component "📋 WHO/NCHS\nPersentilleri" as DATA1
+  component "🔢 Katsayı\nTabloları" as DATA2
+  component "💊 Beslenme\nReferansları" as DATA3
+}
+
+database "💾 DEPOLAMA" {
+}
+
+package "🎨 GÖRSELLEŞTIRME" {
+  component "🏆 Kartlar\n(Cards)" as VIZ1
+  component "📊 Grafik\n(Charts)" as VIZ2
+}
+
+' ========== ANA BAĞLANTILER ==========
+
+UI1 -.-> UI2 : "Profil"
+UI1 -.-> UI3 : "Ölçüm"
+UI1 -.-> UI5 : "Trend"
+
+UI2 --> DEPOLAMA : "Kaydet"
+
+UI3 --> ALG1 : "Doğum Tarihi"
+ALG1 --> ALG2 : "Yaş"
+
+UI3 --> ALG2 : "Boy, Kilo, Bel,\nTriceps, Kol"
+ALG2 --> ALG3 : "6 Ölçüm"
+
+ALG3 --> DATA1 : "Yaş Sorgusu"
+DATA1 --> ALG3 : "Persentil Verileri"
+
+ALG3 --> ALG4 : "BMI Durumu"
+ALG1 --> ALG4 : "Yaş-Cinsiyet"
+ALG4 --> DATA2 : "Katsayı"
+
+ALG1 --> ALG4 : "Yaş Grubu"
+ALG4 --> DATA3 : "Mikro Besin"
+
+ALG3 --> UI4 : "Persentiller"
+ALG4 --> UI4 : "Beslenme Planı"
+DATA3 --> UI4 : "Vitaminler"
+
+UI4 --> VIZ1 : "Özet"
+UI4 --> VIZ2 : "Persentil"
+VIZ2 --> VIZ1 : "Veri"
+
+UI4 --> DEPOLAMA : "Kaydet"
+DEPOLAMA --> UI5 : "Tarihsel Veri"
+UI5 --> VIZ2 : "Trend"
+
+DEPOLAMA -.-> UI1 : "Yükle"
+
+' ========== İŞLEM AKIŞ NOTLARI ==========
+
+note right of ALG1
+  **Merkez Bileşen:**
+  Tüm hesaplamaları etkiler
+  • Persentil seçiminde
+  • Beslenme katsayısında
+  • Mikro besin gruplandırmasında
+end note
+
+note right of ALG3
+  **Durum Belirleme:**
+  🔴 Kritik: ≤3 veya ≥95
+  🟠 Uyarı: 5-15 veya 85-95
+  🟢 İdeal: 15-85
+end note
+
+note bottom
+  🔄 **AKIŞ ADIMLAR:**
+  
+  1️⃣ Profil Yönet → LocalStorage
+  2️⃣ Ölçüm Gir → Yaş + Antropometrik
+  3️⃣ Persentil → Veri Kaynakları
+  4️⃣ Beslenme → Katsayı & Beslenme
+  5️⃣ Sonuç → Görselleştirme
+  6️⃣ Kaydet → LocalStorage
+  7️⃣ Trend → Tarihsel Veriler
+end note
+
+@enduml
+note bottom
+  🔄 **ANA AKIŞ:**
+  
+  1️⃣ Profil Yönetimi → 2️⃣ Ölçüm Girişi
+  ↓
+  3️⃣ Yaş & Antropometrik Hesaplamalar
+  ↓
+  4️⃣ Persentil & Beslenme Analizi
+  ↓
+  5️⃣ Sonuç Gösterimi & Depolama
+  ↓
+  6️⃣ Tarihsel Trend Analizi
+  
+  💾 LocalStorage tüm adımlarda veri kaydeder
+end note
+
+@enduml

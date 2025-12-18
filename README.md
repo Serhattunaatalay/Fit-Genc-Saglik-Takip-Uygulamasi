@@ -31,7 +31,7 @@
 
 ## 🎯 Hakkında
 
-**Fit Genç**, 13-17 yaş arası ergenler için geliştirilmiş kapsamlı bir sağlık ve beslenme takip uygulamasıdır. Uygulama, WHO (Dünya Sağlık Örgütü) ve NCHS (National Center for Health Statistics) referans değerlerine göre persentil analizleri yaparak, ergenlerin büyüme ve gelişim durumlarını değerlendirir.
+**Fit Genç**, 13-18 yaş arası ergenler için geliştirilmiş kapsamlı bir sağlık ve beslenme takip uygulamasıdır. Uygulama, WHO (Dünya Sağlık Örgütü), TÜBER ve NCHS (National Center for Health Statistics) referans değerlerine göre persentil analizleri yaparak, ergenlerin büyüme ve gelişim durumlarını değerlendirir.
 
 ### Temel Amaç
 

@@ -1,0 +1,162 @@
+@startuml Anthropometric-Calculation-Flowchart
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam startEndBackgroundColor #10b981
+skinparam endBackgroundColor #10b981
+skinparam activityBackgroundColor #d1fae5
+skinparam activityBorderColor #059669
+skinparam activityBorderThickness 2
+skinparam partitionBackgroundColor #ecfdf5
+skinparam partitionBorderColor #065f46
+skinparam arrowColor #4b5563
+skinparam arrowThickness 2
+skinparam noteFontSize 10
+
+title **Antropometrik Ölçüm Hesaplama Algoritması**\n**7 Ölçüm Parametresi**
+
+start
+
+:📊 **GİRİŞ ÖLÇÜMLERI**
+  ----
+  • Cinsiyet (M/K)
+  • Boy (cm)
+  • Kilo (kg)
+  • Bel Çevresi (cm)
+  • Triceps Kalınlığı (mm)
+  • Kol Çevresi (cm);
+
+:Standartlaştırma
+  ----
+  heightM = height / 100
+  π = 3.1416;
+
+partition "**BMI Hesaplama**" {
+  :Body Mass Index
+    ----
+    **BMI = weight / (heightM²)**
+    
+    Birim: kg/m²
+    WHO Standartı
+    
+    Örn: 65 kg / (1.65²) = 23.86;
+}
+
+partition "**WHTR Hesaplama**" {
+  :Waist-to-Height Ratio
+    ----
+    **WHTR = waist / height**
+    
+    İçyağ Göstergesi
+    
+    Örn: 75 cm / 165 cm = 0.45
+    İdeal: < 0.5;
+}
+
+partition "**Kol Yağ Alanı (AFA)**" {
+  :Triceps Birimi Dönüştür
+    ----
+    tricepsCM = triceps / 10
+    mm → cm dönüşümü
+    
+    Örn: 15 mm → 1.5 cm;
+  
+  :Yağ Alanı Formülü
+    ----
+    **AFA = (Kol × tricepsCM/2) - (π × tricepsCM²/4)**
+    
+    Adım 1: (28 × 1.5 / 2) = 21
+    Adım 2: (π × 1.5²/4) = 1.766
+    Sonuç: 21 - 1.766 = 19.234 cm²;
+}
+
+partition "**Kol Kas Alanı (AMA)**" {
+  :İç Yarıçap Hesapla
+    ----
+    **innerTerm = Kol - (π × tricepsCM)**
+    
+    Örn: 28 - (3.1416 × 1.5) = 23.288 cm;
+  
+  :Cinsiyet Sabitini Belirle
+    ----
+    C_erkek = 10 cm²
+    C_kiz = 6.5 cm²
+    
+    (Erkeklerin yüksek kemik yoğunluğu);
+  
+  :Kas Alanı Formülü
+    ----
+    **AMA = ((innerTerm²) / (4×π)) - C**
+    
+    Erkek örn: ((23.288²) / 12.566) - 10 = 33.14 cm²;
+}
+
+:📈 **PERSENTİL KARŞILAŞTIRMASı**
+  ----
+  7 Ölçüm yaşa uygun standartlara
+  WHO/NCHS referanslarına göre
+  karşılaştırılır;
+
+:📤 **ÇIKTI PARAMETRELERI**
+  ----
+  • BMI: kg/m²
+  • WHTR: Oran
+  • AFA: cm²
+  • AMA: cm²
+  + Persentil Durumları;
+
+stop
+
+note right
+  **WHO Standartları:**
+  Gelişmiş ülkeler referansı
+  → BMI, Boy Persentilleri
+  
+  **NCHS Standartları:**
+  ABD Sağlık İstatistikleri
+  → Ağırlık, Triceps, Kol,
+  Yağ Alan, Kas Alanı
+  
+  **Yaş Aralığı:**
+  13-17 yaş: 9 persentil seviyesi
+  (5, 10, 15, 25, 50, 75, 85, 90, 95)
+  
+  **Cinsiyet Farkı:**
+  Erkek ve Kız untuk farklı
+  referans değerlerine sahip
+end note
+
+note bottom
+  📊 **7 ÖLÇÜM ÖZETİ:**
+  
+  ✓ **BMI** - Vücut Kitle İndeksi (WHO)
+  ✓ **Boy** - Uzunluk (WHO)
+  ✓ **Kilo** - Ağırlık (NCHS)
+  ✓ **Triceps** - Cilt Kalınlığı (NCHS)
+  ✓ **Kol Çevresi** (NCHS)
+  ✓ **Kol Yağ Alanı** (NCHS)
+  ✓ **Kol Kas Alanı** (NCHS)
+  
+  **Sonuç:** Her ölçüm yaş-cinsiyet gruplarına göre
+  değerlendirilir → Durum Belirlenir
+end note
+
+@enduml
+
+
+
+note bottom
+  � **7 ÖLÇÜM ÖZETİ:**
+  
+  ✓ **BMI** - Vücut Kitle İndeksi (WHO)
+  ✓ **Boy** - Uzunluk (WHO)
+  ✓ **Kilo** - Ağırlık (NCHS)
+  ✓ **Triceps** - Cilt Kalınlığı (NCHS)
+  ✓ **Kol Çevresi** (NCHS)
+  ✓ **Kol Yağ Alanı** (NCHS)
+  ✓ **Kol Kas Alanı** (NCHS)
+  
+  **Sonuç:** Her ölçüm yaş-cinsiyet gruplarına göre
+  değerlendirilir → Durum Belirlenir
+end note
+
+@enduml

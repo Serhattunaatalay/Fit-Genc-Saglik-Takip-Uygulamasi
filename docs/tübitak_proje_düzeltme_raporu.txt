@@ -1,0 +1,47 @@
+* kod react ile yazıldı node modules dosyası içeriği bizim bu projede kullandığımız kütüphane bilgilerini içerir ana koda dahil değildir .node js kurmanız gerekmekte bende 25.2.1 sürümü var onu kurarsanız sorun yaşamazsınız diye düşünüyorum. projeyi ilk kurduğunuzda cmd açıp terminalde npm install yazdığınız zaman paketler node modules klasörüne yüklenir . npm run dev yaptıktan sonra da proje lokal ortamda yani bilgisayarınızda çalışır localhost:3000 adresini tarayıcıdan girerek projenizin arayüzünü test edebilirsiniz
+* karmaşık tek script kodu yerine daha modüler temiz kod yazımına geçildi.
+* projeyle alakalı dokümanlar word formundaydı ocr ile anlaşılması amacıyla pdf e çevrilip bunu da proje içindeki docs klasöründe tutuldu. bilgiler buradan çekerek faydalanıldı.
+* vitamin mineraller lif su posa değerleri yanlıştı onlar yaşa göre düzeltildi.
+* karbonhidrat yağ gösterilmiyordu onlar getirildi hesaplamaları kontrol edildi.
+* protein değer hesabında yanlış katsayı ile yazılmış kod vardı . pdf deki parametrelere göre hesaplama düzeltildi.
+* aktivite düzeyi seçme kısmı kaldırıldı onun yerine sabit 1.6 pal parametresi alındı.
+
+* en önemli sorun olan bmi daki aykırı değerler olan <5 ve >95 için ;
+İki durum var:
+BMI kritik eşiği: PDF'de ≤3 veya ≥95, kodda ≤5 kontrolü var.
+Düzeltilmiş ağırlık: PDF'de yaş bazlı katsayılar var, kodda sabit katsayı kullanılıyor.
+
+düzeltilmiş ağırlık parametreleri constants dosyasına girildi sabit katsayı yerine pdf deki gerçek değerlerden hesaplamalar yapılıyor .
+
+Düzeltilmiş ağırlık (satır 108):
+Formül: correctedWeight = correctedWeightCoef * heightM
+Boy metre cinsinden (heightM)
+Yaş bazlı katsayılar kullanılıyor
+Mobil ağırlık (satır 111):
+Formül: (0.75 × currentWeight) + (0.25 × correctedWeight)
+PDF ile uyumlu
+Enerji hesaplaması (satır 118-122):
+Erkek: (17.5 × usedWeight + 651) × 1.6
+Kadın: (12.2 × usedWeight + 746) × 1.6
+PAL sabit 1.6
+PDF ile uyumlu
+Protein (satır 125):
+Formül: (energy * 0.18) / 4
+PDF ile uyumlu
+BMI kritik eşiği (satır 70):
+pStart <= 3 || pStart >= 95
+PDF ile uyumlu (≤3 veya ≥95)
+
+* yaş grubu seçim kısmında hatalar vardı pdf e göre düzeltildi percentile hesabı için
+* bel boy oran hesabında kodda sıkıntılar vardı daha basitleştirildi.
+
+* tüm bilgileri pdf ile karşılaştırdıktan sonra hepsinde doğru sonucu aldım şimdilik tek bir denemede . yaş 14 boy 160 kilo 55 triceps 12 kol 25 kız bmi 21.5 sonra da bmi üst ve alt aykırı değer olanları deneyeceğiz.
+* daha sonra yaş 15 boy 160 kilo 70 triceps 14 bmi 27.3 ile 95 percentilin üstü kız kategorisindeki kişide testler yaptım ve değerler doğru çıktı dönüştürülmüş kaloriye göre hesaplamaları yapıyor . vitamin mineral vs değerlerine de 14 yaş yerine 15 girildi ve farklı sonuçlar veriyor mu bakıldı . 15 yaşa uygun su mineral vitamin vs değerleri gösteriliyor.
+* 16 yaşında bmi bu sefer çok düşük olan bir örneklemde de pdf verileriyle tutarlı gözlemler elde edildi.
+
+* aynı değerlendirmeler erkek gözlem birimleri için de yapıldı ve tutarlılıklar sağlandı.
+
+* değerleri girip sonuçları gördükten sonra geri çıkınca eski bilgiler görüntülenemiyordu o sorun giderildi. geçmiş kısmında analizler satır satır yazıyor üstüne tıklayınca ayrıntılı sayfaya yönlendiriyor.üstte de analiz geçmişlerine göre grafiklendirilme yapılmış.
+* sanırım rapordaki kaynakçalar arayüzün en altında gösterilsin gibi bir şey denmişti . ona da akordiyon bir butonla sağladık . en aşağıda kaynakça yazan yazıya tıkladığınız zaman kaydırabileceğiniz şekilde altta göz yormayan bir kısım açılıyor oradan kaynaklar incelenebilir.
+
+* ancak arkadaşlar bunu aktif canlıda çalışan bir uygulama olarak yapmak istiyorlarsa bu verileri bir veritabanında tutmaları gerekiyor . şu anda sen projeyi çalıştırdığın esnada girdiğin bilgiler tutuluyor . her kapayıp açtığında o bilgiler sıfırlanacak . basit bir veritabanı yeterli olacaktır supabase kullanabilirler bunun için bulut destekli bir backend ortamı diyebiliriz kullanıcı dostu çok zorlamayacak bir platform
