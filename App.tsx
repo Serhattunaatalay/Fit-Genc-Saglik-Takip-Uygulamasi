@@ -775,7 +775,7 @@ export default function App() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col font-sans text-slate-600 bg-slate-50 pb-8">
+        <div className="min-h-screen flex flex-col font-sans text-slate-600 bg-slate-50 pb-8" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
             {renderHeader()}
             <main className="flex-grow p-4 md:p-8 max-w-6xl mx-auto w-full">
                 {currentView === 'list' && renderStudentList()}
